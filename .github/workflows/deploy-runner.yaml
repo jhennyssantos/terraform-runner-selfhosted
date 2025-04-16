@@ -43,5 +43,5 @@ jobs:
       # Apply Terraform (requires approval for safety)
       - name: Terraform Apply
         if: github.event_name == 'push'
-        run: terraform apply -var-file=../env/lab.tfvars -auto-approve tfplan
+        run: terraform apply -auto-approve tfplan
         working-directory: ./runner-ephemeral
