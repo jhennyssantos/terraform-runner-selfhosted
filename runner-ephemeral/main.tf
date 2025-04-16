@@ -66,6 +66,7 @@ module "runners" {
   enable_job_queued_check = true
   enable_organization_runners = true
   scale_up_reserved_concurrent_executions = 0
+  logging_retention_in_days = 1
   
   
 
