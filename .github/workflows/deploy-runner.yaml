@@ -1,4 +1,4 @@
-Name: Deploy Runner to Lab Personal
+name: Deploy Runner to Lab Personal
 
 on:
   push:
