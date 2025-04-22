@@ -29,11 +29,18 @@ jobs:
           aws-region: us-east-1
 
       - name: Terraform Init
-        run: terraform init -backend-config="bucket=tfstate-jheni-lab" -backend-config="key=terraform-runner-selfhosted.tfstate" -backend-config="region=us-east-1"
+        run: terraform init
         working-directory: ./runner-ephemeral
 
       - name: Terraform Validate
         run: terraform validate
+        working-directory: ./runner-ephemeral
+
+
+      - name: Terraform Workspace Setup
+        run: |
+          terraform workspace list | grep "lab" || terraform workspace new lab
+          terraform workspace select lab
         working-directory: ./runner-ephemeral
 
       - name: Terraform Plan
