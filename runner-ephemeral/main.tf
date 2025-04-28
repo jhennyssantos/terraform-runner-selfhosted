@@ -1,7 +1,29 @@
+
+
 locals {
   # Set the default region to us-east-1
   aws_region = "us-east-1"
   environment = "lab"
+  userdata_post_install = "<<EOF
+    #!/bin/bash
+    curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-arm64
+    sudo install minikube-linux-arm64 /usr/local/bin/minikube && rm minikube-linux-arm64
+
+    # install docker
+    sudo dnf update -y
+    sudo dnf remove docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine
+    sudo dnf install -y yum-utils device-mapper-persistent-data lvm2
+    sudo dnf config-manager --add-repo https://download.docker.com/linux/amazonlinux/docker-ce.repo
+    sudo dnf install docker-ce-27.3.1 docker-ce-cli-27.3.1 containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo systemctl start docker 
+    sudo systemctl enable docker
+    sudo usermod -aG docker $USER
+    docker --version
+
+
+    #start minikube
+    minikube start --kubernetes-version=v1.28.0 --driver=docker --container-runtime=containerd --cni=flannel --network-plugin=cni --enable-default-cni --force --wait=all
+    EOF"
 }
 
 
@@ -67,27 +89,7 @@ module "runners" {
   enable_organization_runners = true
   scale_up_reserved_concurrent_executions = 0
   logging_retention_in_days = 1
-  userdata_post_install = "<<EOF
-  #!/bin/bash
-  curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-arm64
-  sudo install minikube-linux-arm64 /usr/local/bin/minikube && rm minikube-linux-arm64
-
-  # install docker
-  sudo dnf update -y
-  sudo dnf remove docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine
-  sudo dnf install -y yum-utils device-mapper-persistent-data lvm2
-  sudo dnf config-manager --add-repo https://download.docker.com/linux/amazonlinux/docker-ce.repo
-  sudo dnf install docker-ce-27.3.1 docker-ce-cli-27.3.1 containerd.io docker-buildx-plugin docker-compose-plugin
-  sudo systemctl start docker 
-  sudo systemctl enable docker
-  sudo usermod -aG docker $USER
-  docker --version
-
-
-  #start minikube
-  minikube start --driver=docker
-  minikube start
-  EOF"
+  userdata_post_install = local.userdata_post_install
   
   
 
